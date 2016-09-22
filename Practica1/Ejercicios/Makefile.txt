@@ -1,0 +1,21 @@
+SHELL = /bin/bash
+
+SRC = $(wildcard *.cc)
+S   = $(filter-out printf.s printf2.s, $(wildcard *.s))
+OBJ = $(S:.s=.o)
+EXE = $(basename $(S) $(SRC) printf printf2)
+
+all: $(OBJ) $(EXE)
+
+clean:
+	$(RM) $(EXE) $(OBJ) core.* *~
+
+%.o: %.s
+	$(AS) $< -o $@
+
+%: %.o
+	$(LD) $< -o $@
+
+%: %.s
+	$(CC) -m32 $< -o $@
+

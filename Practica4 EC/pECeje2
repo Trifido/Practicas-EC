@@ -1,0 +1,4 @@
+Ejercicio EC:
+	Tenemos un vector de 64mb, si recorremos solo una parte del vector de forma que cada acceso sea fallo,meter dos bucles anidados, o un bucle desde i=0 hasta un millon y acceder al elemento i%1024, aprovechamos la localidad temporal
+
+google: intel cpu world

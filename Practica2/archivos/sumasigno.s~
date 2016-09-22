@@ -1,0 +1,51 @@
+.section .data
+
+      .macro linea
+		.int 1,-2,1,-2
+	#	.int 2,2,2,2
+	#	.int 1,2,3,4
+	#	.int -1,-1,-1,-1
+	#	.int 0xfffffffff,0xfffffffff,0xfffffffff,0xfffffffff 
+	#	.int 0x08000000,0x08000000,0x08000000,0x08000000 
+	#	.int 0x10000000,0x20000000,0x40000000,0x80000000
+        .endm
+lista: .irpc i,12345678
+		linea
+	.endr
+
+longlista:	.int (.-lista)/4
+
+resultado:	.quad-1
+
+
+.section .text
+_start:	.global _start
+
+	mov $lista, %ebx		# Almacenamos en %ebx el contenido lista
+	mov longlista, %ecx		# Almacenamos en %ecx longlista
+	call suma			# Llamamos a la función suma
+	mov %edi, resultado		# Movemos la primera parte de la suma a resultado
+	mov %ebp, resultado+4		# Movemos el resto de la suma a resultado en la parte alta al ser little-endian
+
+	mov $1, %eax			# Le introducimos al registro %eax el valor 1
+	mov $0, %ebx			# Le introducimos al registro %ebx el valor 0
+	int $0x80			# Llamamos a exit(0)
+
+suma:
+	push %esi			# Guardamos el posible contenido anterior de %esi
+	mov $0, %esi			# Y le asignamos a los cuatro registros el valor 0
+	mov $0, %eax
+	mov $0, %edx			# El registro %edx se encargar de acumular los acarreos
+ 	mov $0, %edi			# Ponemos a 0 el registro en el que almacenamos los primeros 32 bits
+bucle:
+	add (%ebx,%esi,4), %eax		# Vamos sumando el registro que toque a %eax
+        cdq				# Extension de signo para %eax, EDX:EAX m ExtSigno(EAX)
+ 	add %eax, %edi			# Sumamos en %edi los 32 primeros bits
+ 	adc %edx, %ebp			# Sumamos con acarreo, si hay, de los siguientes 32 bits en la pila
+
+        inc  %esi			# Incrementamos el registro contado %esi
+	cmp  %esi,%ecx			# Comparamos para ver si ha llegado al final el bucle
+	jne bucle			# Si no ha llegado al final saltamos de nuevo al inicio del bucle
+	
+	pop %esi			# En caso contrario restauramos %esi y hacemos un return
+	ret

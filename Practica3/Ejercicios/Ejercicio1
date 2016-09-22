@@ -1,0 +1,3 @@
+COmpilacion de ejercicio 1:
+
+gcc -fno-omit-frame-pointer -m32 -O1 -g suma_09_
